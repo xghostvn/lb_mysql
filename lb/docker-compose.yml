@@ -1,0 +1,13 @@
+version: "3.5"
+services:
+  ha_proxy:
+    container_name: lb_mysql
+    build: .
+    networks:
+    - mysql_network
+    ports:
+      - "9999:3306"
+      - "9990:8080"
+networks:
+  mysql_network:
+    name: lb_mysql_network

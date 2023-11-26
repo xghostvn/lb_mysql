@@ -1,0 +1,47 @@
+version: "3.5"
+services:
+  master:
+    container_name: master_mysql
+    build: .
+    env_file:
+      - .env
+    environment:
+      - MYSQL_USER:${MYSQL_USER}
+      - MYSQL_PASSWORD:${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD:${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE:${MYSQL_DATABASE}
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --sql_mode=NO_ENGINE_SUBSTITUTION
+    ports:
+      - "9096:3306"
+    volumes:
+      - ./primary.cnf:/etc/mysql/conf.d/my.cnf
+      - ./bash.sh:/bash.sh
+    networks:
+      - mysql_network
+  worker1:
+    container_name: worker1
+    image: mysql
+    env_file:
+      - .env
+    environment:
+      - MYSQL_USER:${MYSQL_USER}
+      - MYSQL_PASSWORD:${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD:${MYSQL_ROOT_PASSWORD}
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --sql_mode=NO_ENGINE_SUBSTITUTION
+      --log-bin=mysql-bin
+      --server-id=2
+    ports:
+      - "9097:3306"
+    expose:
+      - "3306"
+    volumes:
+      - ./worker.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - mysql_network
+networks:
+  mysql_network:
+    name: lb_mysql_network
